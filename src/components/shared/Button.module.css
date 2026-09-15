@@ -1,0 +1,29 @@
+.btn {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: var(--font-display);
+  text-align: center;
+  border: 1px solid transparent;
+  min-height: 44px;
+  transition: filter var(--dur-fast) var(--ease-out);
+}
+
+.primary {
+  background: var(--track);
+  color: #1A0A04;
+}
+
+.secondary {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

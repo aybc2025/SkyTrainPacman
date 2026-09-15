@@ -1,0 +1,79 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: oklch(10% 0.02 260 / 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in var(--dur-modal) var(--ease-out);
+}
+
+.card {
+  width: min(280px, 84%);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  box-shadow: var(--shadow-2);
+  animation: pop-in var(--dur-modal) var(--ease-out);
+}
+
+.title {
+  font-weight: 900;
+  font-size: 1.05rem;
+  margin-bottom: var(--space-1);
+}
+
+.titleWin {
+  color: var(--good);
+}
+
+.titleLose {
+  color: var(--bad);
+}
+
+.scoreValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--track);
+  margin: var(--space-3) 0 2px;
+}
+
+.sub {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: var(--space-4);
+}
+
+.spacer {
+  height: var(--space-2);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .card {
+    animation: none;
+  }
+}

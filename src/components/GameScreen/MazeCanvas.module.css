@@ -1,0 +1,116 @@
+.maze {
+  position: relative;
+  flex: 1;
+  margin: var(--space-2) var(--space-4) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+
+.hitFlash {
+  box-shadow: inset 0 0 0 3px var(--bad);
+}
+
+.winFlash {
+  box-shadow: inset 0 0 0 3px var(--good);
+}
+
+.grid {
+  position: absolute;
+  inset: var(--space-1);
+  display: grid;
+  gap: 1px;
+}
+
+.wall {
+  background: var(--line);
+  border-radius: 2px;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dot {
+  width: 14%;
+  height: 14%;
+  min-width: 3px;
+  min-height: 3px;
+  border-radius: 50%;
+  background: var(--track);
+  opacity: 0.85;
+}
+
+.powerDot {
+  width: 34%;
+  height: 34%;
+  min-width: 7px;
+  min-height: 7px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 6px var(--good);
+}
+
+/* Sprites are positioned absolutely by percentage so they can move smoothly
+   between grid cells regardless of the grid's exact pixel size. */
+.sprite {
+  position: absolute;
+  width: 6.5%;
+  aspect-ratio: 1.4 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 30%;
+  transition: top var(--dur-base) var(--ease-in-out), left var(--dur-base) var(--ease-in-out);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.trainCanada {
+  background: var(--canada);
+}
+
+.trainExpo {
+  background: var(--expo);
+}
+
+.trainMillennium {
+  background: var(--millennium);
+}
+
+.fleeing {
+  filter: brightness(1.4) saturate(0.6);
+  animation: flee-pulse 400ms var(--ease-in-out) infinite alternate;
+}
+
+@keyframes flee-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.6;
+  }
+}
+
+.player {
+  position: absolute;
+  width: 6%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--track);
+  box-shadow: 0 0 6px var(--track);
+  transition: top var(--dur-fast) var(--ease-in-out), left var(--dur-fast) var(--ease-in-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite,
+  .player {
+    transition: none;
+  }
+  .fleeing {
+    animation: none;
+    opacity: 0.75;
+  }
+}

@@ -1,0 +1,20 @@
+.screen {
+  background: var(--bg);
+}
+
+.mazeWrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.footer {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  text-align: center;
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}

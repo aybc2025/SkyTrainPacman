@@ -1,0 +1,45 @@
+.screen {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-panel) 100%);
+}
+
+.hero {
+  padding: var(--space-12) var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.logo {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto var(--space-3);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--expo), var(--canada) 50%, var(--millennium));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: var(--shadow-1);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin: var(--space-1) 0 0;
+}
+
+.levelList {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-4) var(--space-4) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow-y: auto;
+  flex: 1;
+}

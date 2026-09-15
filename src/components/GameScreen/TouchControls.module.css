@@ -1,0 +1,58 @@
+.swipeLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  touch-action: none;
+}
+
+/* Directional pad — deliberately NOT using logical/RTL-mirrored properties.
+   Up/down/left/right here map to physical screen directions the player's
+   thumb already learned, not to reading order, so this is one of the
+   legitimate exceptions to "always mirror in RTL" (frontend-craft §4:
+   spatial/physical controls stay as-is, only reading-order UI mirrors). */
+.dpad {
+  position: absolute;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 2;
+  width: 132px;
+  height: 132px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  opacity: 0.85;
+}
+
+.dpadBtn {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.down {
+  grid-column: 2;
+  grid-row: 3;
+}

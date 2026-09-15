@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+if [ -d "node_modules" ] && [ -f "package.json" ]; then
+  if [ ! -f "package-lock.json" ]; then
+    echo "❌ commit blocked: node_modules exists but package-lock.json is missing."
+    echo "   Run: npm install    (this generates package-lock.json)"
+    exit 1
+  fi
+  if ! git diff --cached --name-only | grep -q "^package-lock.json$" \
+     && ! git ls-files --error-unmatch package-lock.json > /dev/null 2>&1; then
+    echo "❌ commit blocked: package-lock.json exists on disk but isn't tracked by git."
+    echo "   Run: git add package-lock.json"
+    exit 1
+  fi
+fi
+exit 0
