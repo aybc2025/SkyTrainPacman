@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // Base path must match the GitHub Pages repo name (see CLAUDE.md — Deployment model).
 // Change this if the repo is renamed.
-const REPO_NAME = 'skytrain-chase';
+const REPO_NAME = 'SkyTrainPacman';
 
 export default defineConfig({
   base: `/${REPO_NAME}/`,
