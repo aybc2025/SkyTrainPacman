@@ -24,6 +24,14 @@ export default function LevelCompleteModal({ score, previousHighScore, isNewHigh
         <Button variant="secondary" onClick={onReplay}>
           שחק שוב לניקוד גבוה
         </Button>
+        {hasNextLevel && (
+          <>
+            <div className={styles.spacer} />
+            <Button variant="secondary" onClick={onExit}>
+              חזרה לבחירת שלב
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ function freshTrainsState(level, parsed) {
   }));
 }
 
-export function useMazeEngine(level) {
+export function useMazeEngine(level, { highScoreMode = false } = {}) {
   const parsed = useMemo(() => parseMaze(level.maze), [level]);
 
   const [phase, setPhase] = useState('ready');
@@ -221,17 +221,25 @@ export function useMazeEngine(level) {
   }, [player.row, player.col, trains, phase, powerMode]);
 
   // ---- win / lose resolution ----
+  // In high-score mode (replaying an already-completed level) reaching the
+  // threshold doesn't end the run — the player keeps playing past it to
+  // build a bigger score, and the round only ends when lives run out.
   useEffect(() => {
     if (phase !== 'playing') return;
-    if (score >= level.threshold) {
+    if (!highScoreMode && score >= level.threshold) {
       setPhase('won');
       emit('win', { score });
     } else if (lives <= 0) {
-      setPhase('lost');
-      emit('lose', { score });
+      if (score >= level.threshold) {
+        setPhase('won');
+        emit('win', { score });
+      } else {
+        setPhase('lost');
+        emit('lose', { score });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [score, lives, phase]);
+  }, [score, lives, phase, highScoreMode]);
 
   return {
     phase,

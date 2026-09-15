@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMazeEngine } from '../../engine/useMazeEngine.js';
 import Hud from './Hud.jsx';
 import MazeCanvas from './MazeCanvas.jsx';
@@ -20,7 +20,11 @@ const KEY_TO_DIRECTION = {
 };
 
 export default function GameScreen({ level, onExit, onRestart, onGoToLevel, onLevelComplete, getLevelProgress }) {
-  const engine = useMazeEngine(level);
+  // Captured once at mount (this component remounts fresh each session via
+  // App's sessionKey): if the level was already beaten before this run
+  // started, this run is inherently a high-score attempt.
+  const [highScoreMode] = useState(() => getLevelProgress(level.id).completed);
+  const engine = useMazeEngine(level, { highScoreMode });
 
   // Keyboard support (desktop testing / anyone with a keyboard attached).
   useEffect(() => {
@@ -70,6 +74,7 @@ export default function GameScreen({ level, onExit, onRestart, onGoToLevel, onLe
         lives={engine.lives}
         maxLives={engine.maxLives}
         onPause={engine.pause}
+        onExit={onExit}
         powerMode={engine.powerMode}
       />
 

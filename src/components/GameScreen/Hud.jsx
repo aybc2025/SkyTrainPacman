@@ -1,6 +1,6 @@
 import styles from './Hud.module.css';
 
-export default function Hud({ level, score, threshold, lives, maxLives, onPause, powerMode }) {
+export default function Hud({ level, score, threshold, lives, maxLives, onPause, onExit, powerMode }) {
   const progressPct = Math.min(100, (score / threshold) * 100);
 
   return (
@@ -9,14 +9,24 @@ export default function Hud({ level, score, threshold, lives, maxLives, onPause,
         <div className={styles.levelName}>
           שלב {level.id} · {level.name}
         </div>
-        <button
-          type="button"
-          className={styles.pauseBtn}
-          onClick={onPause}
-          aria-label="השהה משחק"
-        >
-          ⏸
-        </button>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.iconBtn}
+            onClick={onExit}
+            aria-label="חזרה לדף הבית"
+          >
+            🏠
+          </button>
+          <button
+            type="button"
+            className={styles.iconBtn}
+            onClick={onPause}
+            aria-label="השהה משחק"
+          >
+            ⏸
+          </button>
+        </div>
       </div>
 
       <div className={styles.scoreRow}>
