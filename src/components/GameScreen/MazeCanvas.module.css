@@ -1,4 +1,10 @@
 .maze {
+  /* The maze is a fixed physical grid (walls/dots authored per level, sprites
+     positioned by physical left/top, input mapped to physical directions) —
+     it must not mirror under the page's dir="rtl", or CSS Grid auto-placement
+     lays columns right-to-left while sprites stay physically positioned,
+     desyncing what's drawn from where the player/dots actually are. */
+  direction: ltr;
   position: relative;
   flex: 1;
   margin: var(--space-2) var(--space-4) var(--space-4);
