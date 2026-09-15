@@ -76,6 +76,7 @@ export default function GameScreen({ level, onExit, onRestart, onGoToLevel, onLe
         onPause={engine.pause}
         onExit={onExit}
         powerMode={engine.powerMode}
+        lastEvent={engine.lastEvent}
       />
 
       <div className={styles.mazeWrap}>

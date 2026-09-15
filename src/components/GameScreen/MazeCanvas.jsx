@@ -8,19 +8,55 @@ const LINE_CLASS = {
   millennium: styles.trainMillennium
 };
 
-// Sprites are drawn elongated along the horizontal axis by default (see
-// .sprite's aspect-ratio), so a 90° turn is all it takes to make a train
-// visually face the axis it's actually travelling on.
-function axisRotation(direction) {
-  return direction === 'up' || direction === 'down' ? 90 : 0;
+// Both trains and the player are drawn in a "facing right" base pose (train
+// headlight/window detail on the right edge, player's mouth wedge opening
+// rightward) — rotating the wrapper is all it takes to make either one
+// visually face whichever of the 4 directions it's actually travelling.
+function facingRotation(direction) {
+  switch (direction) {
+    case 'down':
+      return 90;
+    case 'left':
+      return 180;
+    case 'up':
+      return 270;
+    default:
+      return 0;
+  }
 }
 
-// A light squash/stretch along the travel axis — purely cosmetic, sells a
-// sense of momentum without needing real sprite art.
-function motionSquash(direction) {
-  if (direction === 'left' || direction === 'right') return 'scale(1.16, 0.87)';
-  if (direction === 'up' || direction === 'down') return 'scale(0.87, 1.16)';
-  return 'scale(1, 1)';
+// A light squash/stretch along the local (already-rotated) travel axis —
+// purely cosmetic, sells a sense of momentum without needing real sprite art.
+function travelSquash(direction) {
+  return direction ? 'scale(1.16, 0.87)' : 'scale(1, 1)';
+}
+
+// Observes the engine's event channel for a 'hit' event and spawns a
+// short-lived "death" ghost at the exact cell the player was hit — the real
+// player sprite resets to the start cell immediately (engine-driven, no
+// delay to gameplay), while this purely decorative ghost independently
+// spins/shrinks away at the old spot. Same event-channel pattern as
+// useScoreBursts, just a single slot since only one life can be lost at once.
+function usePlayerDeathGhost(lastEvent) {
+  const [ghost, setGhost] = useState(null);
+  const lastNonceRef = useRef(0);
+
+  useEffect(() => {
+    if (lastEvent.nonce === lastNonceRef.current) return;
+    lastNonceRef.current = lastEvent.nonce;
+    if (lastEvent.kind !== 'hit') return;
+
+    const id = lastEvent.nonce;
+    const { row, col } = lastEvent.payload;
+    setGhost({ id, row, col });
+    const t = setTimeout(() => {
+      setGhost((g) => (g?.id === id ? null : g));
+    }, 520);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastEvent.nonce]);
+
+  return ghost;
 }
 
 const BURST_KINDS = ['collect', 'powerup', 'capture'];
@@ -77,13 +113,14 @@ export default function MazeCanvas({ grid, player, trains, powerMode, lastEvent 
   const hitFlash = useFlashOnEvent(lastEvent, ['hit'], 260);
   const winFlash = useFlashOnEvent(lastEvent, ['win'], 400);
   const bursts = useScoreBursts(lastEvent);
+  const deathGhost = usePlayerDeathGhost(lastEvent);
 
   const rows = grid.length;
   const cols = grid[0].length;
 
   return (
     <div
-      className={`${styles.maze} ${hitFlash ? styles.hitFlash : ''} ${winFlash ? styles.winFlash : ''}`}
+      className={`${styles.maze} ${hitFlash ? styles.hitFlash : ''} ${winFlash ? styles.winFlash : ''} ${powerMode ? styles.powerActive : ''}`}
     >
       <div
         className={styles.grid}
@@ -116,27 +153,41 @@ export default function MazeCanvas({ grid, player, trains, powerMode, lastEvent 
             style={{
               top: `${((train.row + 0.5) / rows) * 100}%`,
               left: `${((train.col + 0.5) / cols) * 100}%`,
-              transform: `translate(-50%, -50%) rotate(${axisRotation(train.direction)}deg)`,
+              transform: `translate(-50%, -50%) rotate(${facingRotation(train.direction)}deg)`,
               transitionDuration: `${stepMs}ms, ${stepMs}ms, 160ms`
             }}
             aria-hidden="true"
           >
-            <div className={`${styles.sprite} ${LINE_CLASS[train.line]} ${powerMode ? styles.fleeing : ''}`} />
+            <div className={`${styles.sprite} ${LINE_CLASS[train.line]} ${powerMode ? styles.fleeing : ''}`}>
+              <span className={styles.trainWindow} />
+              <span className={styles.headlight} />
+            </div>
           </div>
         );
       })}
+
+      {deathGhost && (
+        <div
+          className={styles.deathGhost}
+          style={{
+            top: `${((deathGhost.row + 0.5) / rows) * 100}%`,
+            left: `${((deathGhost.col + 0.5) / cols) * 100}%`
+          }}
+          aria-hidden="true"
+        />
+      )}
 
       <div
         className={styles.playerWrap}
         style={{
           top: `${((player.row + 0.5) / rows) * 100}%`,
           left: `${((player.col + 0.5) / cols) * 100}%`,
-          transform: `translate(-50%, -50%) ${motionSquash(player.direction)}`,
+          transform: `translate(-50%, -50%) rotate(${facingRotation(player.direction)}deg) ${travelSquash(player.direction)}`,
           transitionDuration: `${PLAYER_STEP_MS}ms, ${PLAYER_STEP_MS}ms, 160ms`
         }}
         aria-hidden="true"
       >
-        <div className={`${styles.player} ${!player.direction ? styles.playerIdle : ''}`} />
+        <div className={`${styles.player} ${player.direction ? styles.playerChomp : styles.playerIdle}`} />
       </div>
 
       {bursts.map((b) => (

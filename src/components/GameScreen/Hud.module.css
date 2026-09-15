@@ -43,9 +43,26 @@
 }
 
 .scoreText {
+  display: inline-block;
   font-size: 0.85rem;
   color: var(--track);
   font-weight: 700;
+}
+
+.scorePulse {
+  animation: score-pop 260ms var(--ease-out);
+}
+
+@keyframes score-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .powerBadge {
@@ -68,8 +85,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .powerBadge {
+  .powerBadge,
+  .scorePulse,
+  .heartLost {
     animation: none;
+  }
+  .progressFill::after {
+    display: none;
   }
 }
 
@@ -81,10 +103,37 @@
 }
 
 .progressFill {
+  position: relative;
   height: 100%;
   background: var(--track);
   border-radius: var(--radius-pill);
   transition: width var(--dur-base) var(--ease-out);
+  overflow: hidden;
+}
+
+/* A soft light sweep drifting across the filled portion — a small bit of
+   "digital departure board" shimmer on top of the flat fill color. */
+.progressFill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.4) 45%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: progress-shimmer 2.2s linear infinite;
+}
+
+@keyframes progress-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -20% 0;
+  }
 }
 
 .livesRow {
@@ -98,8 +147,24 @@
   height: 12px;
   border-radius: 3px;
   background: var(--line);
+  transition: background var(--dur-base) var(--ease-out);
 }
 
 .heart[data-active='true'] {
   background: var(--bad);
+}
+
+.heartLost {
+  animation: heart-lost 500ms ease-out;
+}
+
+@keyframes heart-lost {
+  0% {
+    background: var(--bad);
+    transform: scale(1.5);
+  }
+  100% {
+    background: var(--line);
+    transform: scale(1);
+  }
 }

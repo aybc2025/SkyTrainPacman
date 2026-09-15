@@ -71,9 +71,26 @@ export function useMazeEngine(level, { highScoreMode = false } = {}) {
   const requestDirection = useCallback(
     (direction) => {
       setPhase((p) => (p === 'ready' ? 'playing' : p));
-      setPlayer((p) => ({ ...p, pendingDirection: direction }));
+      setPlayer((p) => {
+        // A direction change that's immediately walkable takes effect right
+        // now instead of waiting for the next scheduled movement tick (up to
+        // PLAYER_STEP_MS later) — that wait is what made a well-timed turn
+        // occasionally feel like it landed late. Continuing in the same
+        // direction (key repeat / holding a swipe) always still rides the
+        // normal tick cadence below, so overall movement speed is unchanged.
+        if (direction !== p.direction) {
+          const { dr, dc } = DIRECTIONS[direction];
+          const nr = p.row + dr;
+          const nc = p.col + dc;
+          if (isWalkable(grid, nr, nc)) {
+            playerMoveAccumRef.current = 0;
+            return { ...p, row: nr, col: nc, direction, pendingDirection: direction };
+          }
+        }
+        return { ...p, pendingDirection: direction };
+      });
     },
-    []
+    [grid]
   );
 
   const pause = useCallback(() => {
@@ -199,7 +216,7 @@ export function useMazeEngine(level, { highScoreMode = false } = {}) {
         )
       );
     } else {
-      emit('hit', { line: hitTrain.line });
+      emit('hit', { line: hitTrain.line, row: player.row, col: player.col });
       setLives((l) => l - 1);
       setPlayer((p) => ({
         ...p,
