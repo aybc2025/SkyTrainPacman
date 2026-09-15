@@ -4,7 +4,7 @@ import { parseMaze, isWalkable, DIRECTIONS, manhattanDistance } from './collisio
 import { computeTrainStep } from './trainAI.js';
 import { DOT_SCORE, POWER_DOT_SCORE, TRAIN_CAPTURE_SCORE } from '../config/levels.js';
 
-const PLAYER_STEP_MS = 160; // ms per grid cell for the player
+export const PLAYER_STEP_MS = 160; // ms per grid cell for the player
 const TRAIN_STEP_BASE_MS = 260; // baseline; each train's own `speed` overrides this
 
 // Game phases:
@@ -161,7 +161,7 @@ export function useMazeEngine(level, { highScoreMode = false } = {}) {
         return copy;
       });
       setScore((s) => s + DOT_SCORE);
-      emit('collect', { row: player.row, col: player.col });
+      emit('collect', { row: player.row, col: player.col, points: DOT_SCORE });
     } else if (cell === 'o') {
       setGrid((g) => {
         const copy = g.map((r) => [...r]);
@@ -170,7 +170,7 @@ export function useMazeEngine(level, { highScoreMode = false } = {}) {
       });
       setScore((s) => s + POWER_DOT_SCORE);
       setPowerMode(true);
-      emit('powerup', { row: player.row, col: player.col });
+      emit('powerup', { row: player.row, col: player.col, points: POWER_DOT_SCORE });
       if (powerTimerRef.current) clearTimeout(powerTimerRef.current);
       powerTimerRef.current = setTimeout(endPowerMode, level.powerDuration);
     }
@@ -185,7 +185,7 @@ export function useMazeEngine(level, { highScoreMode = false } = {}) {
 
     if (powerMode) {
       setScore((s) => s + TRAIN_CAPTURE_SCORE);
-      emit('capture', { line: hitTrain.line });
+      emit('capture', { line: hitTrain.line, row: hitTrain.row, col: hitTrain.col, points: TRAIN_CAPTURE_SCORE });
       setTrains((prev) =>
         prev.map((t) =>
           t.line === hitTrain.line
@@ -223,10 +223,20 @@ export function useMazeEngine(level, { highScoreMode = false } = {}) {
   // ---- win / lose resolution ----
   // In high-score mode (replaying an already-completed level) reaching the
   // threshold doesn't end the run — the player keeps playing past it to
-  // build a bigger score, and the round only ends when lives run out.
+  // build a bigger score. The round then ends either when every dot on the
+  // board is gone (board fully cleared — nothing left to score) or when
+  // lives run out.
+  const hasDotsRemaining = useMemo(
+    () => grid.some((row) => row.includes('.') || row.includes('o')),
+    [grid]
+  );
+
   useEffect(() => {
     if (phase !== 'playing') return;
     if (!highScoreMode && score >= level.threshold) {
+      setPhase('won');
+      emit('win', { score });
+    } else if (highScoreMode && !hasDotsRemaining) {
       setPhase('won');
       emit('win', { score });
     } else if (lives <= 0) {
@@ -239,7 +249,7 @@ export function useMazeEngine(level, { highScoreMode = false } = {}) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [score, lives, phase, highScoreMode]);
+  }, [score, lives, phase, highScoreMode, hasDotsRemaining]);
 
   return {
     phase,

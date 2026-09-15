@@ -59,17 +59,38 @@
   border-radius: 50%;
   background: var(--good);
   box-shadow: 0 0 6px var(--good);
+  animation: power-glow 900ms var(--ease-in-out) infinite alternate;
 }
 
-/* Sprites are positioned absolutely by percentage so they can move smoothly
-   between grid cells regardless of the grid's exact pixel size. */
-.sprite {
+@keyframes power-glow {
+  from {
+    box-shadow: 0 0 4px var(--good);
+    transform: scale(0.9);
+  }
+  to {
+    box-shadow: 0 0 11px var(--good);
+    transform: scale(1.08);
+  }
+}
+
+/* Wrappers are positioned absolutely by percentage (so movement stays smooth
+   regardless of the grid's exact pixel size) and own the top/left glide plus
+   the direction-facing rotation / motion squash. The visual body is a child
+   element so its own animations (fleeing wobble, idle breathing) can freely
+   set `transform` without fighting the wrapper's positioning transform. */
+.spriteWrap {
   position: absolute;
   width: 6.5%;
   aspect-ratio: 1.4 / 1;
-  transform: translate(-50%, -50%);
+  transition-property: top, left, transform;
+  transition-duration: var(--dur-base), var(--dur-base), 160ms;
+  transition-timing-function: var(--ease-in-out);
+}
+
+.sprite {
+  width: 100%;
+  height: 100%;
   border-radius: 30%;
-  transition: top var(--dur-base) var(--ease-in-out), left var(--dur-base) var(--ease-in-out);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -87,36 +108,129 @@
 
 .fleeing {
   filter: brightness(1.4) saturate(0.6);
-  animation: flee-pulse 400ms var(--ease-in-out) infinite alternate;
+  animation: flee-pulse 350ms var(--ease-in-out) infinite alternate;
 }
 
 @keyframes flee-pulse {
   from {
     opacity: 1;
+    transform: rotate(-6deg) scale(0.94);
   }
   to {
     opacity: 0.6;
+    transform: rotate(6deg) scale(1.04);
   }
 }
 
-.player {
+.playerWrap {
   position: absolute;
   width: 6%;
   aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
+  transition-property: top, left, transform;
+  transition-duration: var(--dur-fast), var(--dur-fast), 160ms;
+  transition-timing-function: var(--ease-in-out);
+}
+
+.player {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: var(--track);
   box-shadow: 0 0 6px var(--track);
-  transition: top var(--dur-fast) var(--ease-in-out), left var(--dur-fast) var(--ease-in-out);
+}
+
+.playerIdle {
+  animation: player-breathe 1.6s var(--ease-in-out) infinite;
+}
+
+@keyframes player-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+/* Score popups: a soft radial "pop" plus a floating +N label, spawned at the
+   exact cell where a dot/power-dot/capture happened. Purely decorative and
+   non-interactive. */
+.burst {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.burstRing {
+  position: absolute;
+  inset: -55%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--track) 0%, transparent 70%);
+  animation: burst-ring 380ms var(--ease-out) forwards;
+}
+
+.burstBig .burstRing {
+  inset: -90%;
+  background: radial-gradient(circle, var(--good) 0%, transparent 70%);
+}
+
+.burstScore {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--track);
+  white-space: nowrap;
+  animation: burst-score 600ms var(--ease-out) forwards;
+}
+
+.burstBig .burstScore {
+  color: var(--good);
+  font-size: 0.7rem;
+}
+
+@keyframes burst-ring {
+  from {
+    transform: scale(0.3);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes burst-score {
+  from {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -22px);
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sprite,
-  .player {
+  .spriteWrap,
+  .playerWrap {
     transition: none;
   }
   .fleeing {
     animation: none;
     opacity: 0.75;
+  }
+  .playerIdle {
+    animation: none;
+  }
+  .powerDot {
+    animation: none;
+  }
+  .burst {
+    display: none;
   }
 }
